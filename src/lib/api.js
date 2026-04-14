@@ -1,5 +1,5 @@
 import { db, storage, hasFirebaseConfig } from './firebase';
-import { collection, doc, getDocs, getDoc, addDoc, setDoc, deleteDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, doc, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const isMockMode = !hasFirebaseConfig;
@@ -76,11 +76,10 @@ export const api = {
       const mealsQuery = query(
         collection(db, 'meals'), 
         where('patient_id', '==', patientId), 
-        where('date', '==', dateStr),
-        orderBy('created_at', 'asc')
+        where('date', '==', dateStr)
       );
       const mealsSnapshot = await getDocs(mealsQuery);
-      const meals = [];
+      let meals = [];
       
       // For each meal, we also need to fetch its comments
       // Firebase doesn't auto-join, so we do it manually
@@ -98,6 +97,10 @@ export const api = {
         
         meals.push(mealData);
       }
+      
+      // Sort meals locally by created_at to bypass Firestore composite block
+      meals.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+      
       return { data: meals, error: null };
     } catch (error) {
       console.error("Error fetching meals:", error);
@@ -114,8 +117,29 @@ export const api = {
       return { data: { ...newMeal, comments: [] }, error: null };
     }
     try {
-      const docRef = await addDoc(collection(db, 'meals'), mealData);
-      return { data: { id: docRef.id, ...mealData, comments: [] }, error: null };
+      const docData = { ...mealData, created_at: new Date().toISOString() };
+      const docRef = await addDoc(collection(db, 'meals'), docData);
+      return { data: { id: docRef.id, ...docData, comments: [] }, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
+
+  async updateMeal(mealId, data) {
+    if (isMockMode) {
+      await new Promise(r => setTimeout(r, 600));
+      const idx = mockMeals.findIndex(m => m.id === mealId);
+      if (idx !== -1) {
+        mockMeals[idx] = { ...mockMeals[idx], ...data };
+        localStorage.setItem('mockMeals', JSON.stringify(mockMeals));
+        return { data: mockMeals[idx], error: null };
+      }
+      return { data: null, error: new Error('Meal not found') };
+    }
+    try {
+      const docRef = doc(db, 'meals', mealId);
+      await updateDoc(docRef, data);
+      return { data: { id: mealId, ...data }, error: null };
     } catch (error) {
       return { data: null, error };
     }
@@ -173,6 +197,41 @@ export const api = {
       return { data: { url: downloadURL }, error: null };
     } catch (error) {
       return { data: null, error };
+    }
+  },
+
+  async getWaterLog(patientId, dateStr) {
+    if (isMockMode) {
+      await new Promise(r => setTimeout(r, 200));
+      const log = JSON.parse(localStorage.getItem('mockWaterLogs') || '{}');
+      return { data: log[`${patientId}_${dateStr}`] || 0, error: null };
+    }
+    try {
+      const docRef = doc(db, 'water_logs', `${patientId}_${dateStr}`);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { data: docSnap.data().glasses || 0, error: null };
+      }
+      return { data: 0, error: null };
+    } catch (error) {
+      return { data: 0, error };
+    }
+  },
+
+  async setWaterLog(patientId, dateStr, glasses) {
+    if (isMockMode) {
+      await new Promise(r => setTimeout(r, 200));
+      const logs = JSON.parse(localStorage.getItem('mockWaterLogs') || '{}');
+      logs[`${patientId}_${dateStr}`] = glasses;
+      localStorage.setItem('mockWaterLogs', JSON.stringify(logs));
+      return { data: glasses, error: null };
+    }
+    try {
+      const docRef = doc(db, 'water_logs', `${patientId}_${dateStr}`);
+      await setDoc(docRef, { patient_id: patientId, date: dateStr, glasses });
+      return { data: glasses, error: null };
+    } catch (error) {
+      return { data: 0, error };
     }
   }
 };

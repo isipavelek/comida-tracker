@@ -4,6 +4,8 @@ import Login from './pages/Login';
 import PatientDashboard from './pages/PatientDashboard';
 import ProfessionalDashboard from './pages/ProfessionalDashboard';
 import PatientDetail from './pages/PatientDetail';
+import { ToastProvider } from './contexts/ToastContext';
+import ToastContainer from './components/ToastContainer';
 import './App.css';
 
 function AppContent() {
@@ -11,11 +13,11 @@ function AppContent() {
 
   return (
     <div className="app-container">
-      <header className="mb-6 flex-between animate-fade-in" style={{ padding: '0.5rem 0' }}>
+      <header className="mb-6 flex-between animate-fade-in py-1">
         <h2 style={{ margin: 0 }}><span className="text-gradient">Comida</span>Tracker</h2>
         {user && (
-          <div className="flex-center" style={{ gap: '1rem' }}>
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{profile?.full_name?.split(' ')[0]}</span>
+          <div className="flex-center gap-4">
+            <span className="text-sm text-muted">{profile?.full_name?.split(' ')[0]}</span>
             <button onClick={signOut} className="btn-glass btn-icon" title="Cerrar sesión">
               <span style={{ fontSize: '1.2rem' }}>🚪</span>
             </button>
@@ -23,7 +25,7 @@ function AppContent() {
         )}
       </header>
 
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <main className="flex-col relative" style={{ flex: 1 }}>
           {user && !profile ? (
             <div className="flex-center p-6 h-full w-full">
               <span className="text-muted animate-pulse-slow">Cargando perfil...</span>
@@ -48,11 +50,14 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <HashRouter>
-        <AppContent />
-      </HashRouter>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <HashRouter>
+          <AppContent />
+        </HashRouter>
+      </AuthProvider>
+      <ToastContainer />
+    </ToastProvider>
   );
 }
 

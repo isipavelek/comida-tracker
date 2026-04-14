@@ -177,6 +177,31 @@ p {
 }
 
 /* Utilities */
+.flex-col { display: flex; flex-direction: column; }
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.text-sm { font-size: 0.85rem; }
+.text-xs { font-size: 0.75rem; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.top-0 { top: 0; }
+.right-0 { right: 0; }
+.bottom-0 { bottom: 0; }
+.p-2 { padding: 0.5rem; }
+.pt-1 { padding-top: 0.25rem; }
+.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+
 .text-gradient {
   background: linear-gradient(135deg, #a78bfa, #f472b6);
   -webkit-background-clip: text;
@@ -229,9 +254,55 @@ p {
   flex-direction: column;
 }
 
+/* Toast System Animations */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+.toast-enter {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.toast-exit {
+  animation: slideOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Mobile optimizations */
 @media (max-width: 600px) {
   .app-container {
     padding: 1rem 0.5rem;
+  }
+}
+
+/* Print Styles for PDF Export */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .glass, .glass-panel, .glass-card {
+    background: transparent !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    color: black !important;
+  }
+  .btn, .btn-glass, button {
+    display: none !important;
+  }
+  .text-gradient {
+    -webkit-text-fill-color: black !important;
+  }
+  .app-container {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .no-print {
+    display: none !important;
   }
 }
