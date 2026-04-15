@@ -10,6 +10,7 @@ export default function MealForm({ patientId, date, onSaved, onCancel, initialMe
   const [photos, setPhotos] = useState([]); // Array of { url: string, file: File|null, isNew: boolean }
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
   const { toastSuccess, toastError } = useToast();
 
   const mealTypes = ['Desayuno', 'Media Mañana', 'Almuerzo', 'Merienda', 'Cena', 'Picoteo'];
@@ -48,8 +49,9 @@ export default function MealForm({ patientId, date, onSaved, onCancel, initialMe
       }));
       setPhotos(prev => [...prev, ...newPhotos]);
     }
-    // reset input
+    // reset inputs
     if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
 
   const removePhoto = (index) => {
@@ -152,12 +154,38 @@ export default function MealForm({ patientId, date, onSaved, onCancel, initialMe
         <div>
           <label className="mb-1 block text-sm text-gray-400">Fotos (Opcional)</label>
           
+          <div className="flex-center justify-between gap-2 mb-3">
+            <input 
+              type="file" 
+              accept="image/*" 
+              capture="environment" 
+              ref={cameraInputRef} 
+              style={{ display: 'none' }} 
+              onChange={handlePhotoSelect} 
+            />
+            <button type="button" onClick={() => cameraInputRef.current?.click()} className="btn btn-glass w-full gap-2">
+              <Camera size={18} /> Cámara
+            </button>
+
+            <input 
+              type="file" 
+              accept="image/*" 
+              multiple
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              onChange={handlePhotoSelect} 
+            />
+            <button type="button" onClick={() => fileInputRef.current?.click()} className="btn btn-glass w-full gap-2">
+              <ImageIcon size={18} /> Galería
+            </button>
+          </div>
+          
           <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
             {photos.map((p, idx) => (
               <div key={idx} className="relative" style={{ minWidth: '80px', width: '80px', height: '80px', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border)' }}>
                 <img src={p.url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 <button 
-                  type="button"
+                  type="button" 
                   onClick={() => removePhoto(idx)}
                   className="btn-glass btn-icon absolute top-0 right-0"
                   style={{ width: '20px', height: '20px', padding: '0', margin: '0.25rem', background: 'rgba(0,0,0,0.6)' }}
@@ -166,26 +194,6 @@ export default function MealForm({ patientId, date, onSaved, onCancel, initialMe
                 </button>
               </div>
             ))}
-
-            <div className="relative" style={{ minWidth: '80px', width: '80px', height: '80px' }}>
-              <input 
-                type="file" 
-                accept="image/*" 
-                multiple
-                ref={fileInputRef} 
-                style={{ display: 'none' }} 
-                onChange={handlePhotoSelect} 
-              />
-              <button 
-                type="button" 
-                onClick={() => fileInputRef.current?.click()} 
-                className="btn-glass flex-col flex-center w-full h-full"
-                style={{ borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border)', padding: '0' }}
-              >
-                <Plus size={20} className="mb-1 text-muted" />
-                <span className="text-xs text-muted">Agregar</span>
-              </button>
-            </div>
           </div>
         </div>
 
