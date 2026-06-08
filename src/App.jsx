@@ -4,6 +4,8 @@ import Login from './pages/Login';
 import PatientDashboard from './pages/PatientDashboard';
 import ProfessionalDashboard from './pages/ProfessionalDashboard';
 import PatientDetail from './pages/PatientDetail';
+import EmotionalLogPage from './pages/EmotionalLogPage';
+import EmotionalSummaryPage from './pages/EmotionalSummaryPage';
 import { ToastProvider } from './contexts/ToastContext';
 import ToastContainer from './components/ToastContainer';
 import './App.css';
@@ -14,7 +16,7 @@ function AppContent() {
   return (
     <div className="app-container">
       <header className="mb-6 flex-between animate-fade-in py-1">
-        <h2 style={{ margin: 0 }}><span className="text-gradient">Comida</span>Tracker</h2>
+        <h2 style={{ margin: 0 }}><span className="text-gradient">Nutri</span>Mente</h2>
         {user && (
           <div className="flex-center gap-4">
             <span className="text-sm text-muted">{profile?.full_name?.split(' ')[0]}</span>
@@ -39,8 +41,10 @@ function AppContent() {
               } />
               <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
               <Route path="/patient" element={user && profile?.role === 'patient' ? <PatientDashboard /> : <Navigate to="/login" />} />
+              <Route path="/patient/emocional" element={user && profile?.role === 'patient' ? <EmotionalLogPage /> : <Navigate to="/login" />} />
               <Route path="/professional" element={user && profile?.role === 'professional' ? <ProfessionalDashboard /> : <Navigate to="/login" />} />
               <Route path="/professional/patient/:id" element={user && profile?.role === 'professional' ? <PatientDetail /> : <Navigate to="/login" />} />
+              <Route path="/professional/patient/:id/emocional" element={user && profile?.role === 'professional' ? <EmotionalSummaryPage /> : <Navigate to="/login" />} />
             </Routes>
           )}
         </main>

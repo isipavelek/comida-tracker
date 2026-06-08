@@ -24,6 +24,7 @@ if (!mockProfiles) {
 }
 
 let mockComments = JSON.parse(localStorage.getItem('mockComments') || '[]');
+let mockEmotionalComments = JSON.parse(localStorage.getItem('mockEmotionalComments') || '[]');
 
 export const api = {
   async getPatients() {
@@ -233,5 +234,159 @@ export const api = {
     } catch (error) {
       return { data: 0, error };
     }
-  }
+  },
+
+  // ── Emotional Logs ──────────────────────────────────────────────────────────
+
+  async createEmotionalLog(patientId, data) {
+    const now = new Date();
+    const record = {
+      ...data,
+      patient_id: patientId,
+      date: data.date || now.toISOString().split('T')[0],
+      time: now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+      created_at: now.toISOString(),
+    };
+
+    if (isMockMode) {
+      await new Promise(r => setTimeout(r, 600));
+      const logs = JSON.parse(localStorage.getItem('mockEmotionalLogs') || '[]');
+      const newLog = { id: `elog-${Date.now()}`, ...record };
+      logs.push(newLog);
+      localStorage.setItem('mockEmotionalLogs', JSON.stringify(logs));
+      return { data: newLog, error: null };
+    }
+    try {
+      const docRef = await addDoc(collection(db, 'emotional_logs'), record);
+      return { data: { id: docRef.id, ...record }, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
+
+  async getEmotionalLogsByDate(patientId, dateStr) {
+    if (isMockMode) {
+      await new Promise(r => setTimeout(r, 300));
+      const logs = JSON.parse(localStorage.getItem('mockEmotionalLogs') || '[]');
+      const comments = JSON.parse(localStorage.getItem('mockEmotionalComments') || '[]');
+      const filtered = logs
+        .filter(l => l.patient_id === patientId && l.date === dateStr)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .map(l => ({ ...l, comments: comments.filter(c => c.log_id === l.id) }));
+      return { data: filtered, error: null };
+    }
+    try {
+      const q = query(
+        collection(db, 'emotional_logs'),
+        where('patient_id', '==', patientId),
+        where('date', '==', dateStr)
+      );
+      const snap = await getDocs(q);
+      const logs = [];
+      for (const logDoc of snap.docs) {
+        const logData = { id: logDoc.id, ...logDoc.data(), comments: [] };
+        const cq = query(collection(db, 'emotional_comments'), where('log_id', '==', logDoc.id));
+        const cSnap = await getDocs(cq);
+        cSnap.forEach(cd => logData.comments.push({ id: cd.id, ...cd.data() }));
+        logs.push(logData);
+      }
+      logs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      return { data: logs, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
+
+  async getEmotionalLogsByRange(patientId, startDate, endDate) {
+    if (isMockMode) {
+      await new Promise(r => setTimeout(r, 400));
+      const logs = JSON.parse(localStorage.getItem('mockEmotionalLogs') || '[]');
+      const comments = JSON.parse(localStorage.getItem('mockEmotionalComments') || '[]');
+      const filtered = logs
+        .filter(l => l.patient_id === patientId && l.date >= startDate && l.date <= endDate)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .map(l => ({ ...l, comments: comments.filter(c => c.log_id === l.id) }));
+      return { data: filtered, error: null };
+    }
+    try {
+      const q = query(
+        collection(db, 'emotional_logs'),
+        where('patient_id', '==', patientId),
+        where('date', '>=', startDate),
+        where('date', '<=', endDate)
+      );
+      const snap = await getDocs(q);
+      const logs = [];
+      for (const logDoc of snap.docs) {
+        const logData = { id: logDoc.id, ...logDoc.data(), comments: [] };
+        const cq = query(collection(db, 'emotional_comments'), where('log_id', '==', logDoc.id));
+        const cSnap = await getDocs(cq);
+        cSnap.forEach(cd => logData.comments.push({ id: cd.id, ...cd.data() }));
+        logs.push(logData);
+      }
+      logs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      return { data: logs, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
+
+  async deleteEmotionalLog(logId) {
+    if (isMockMode) {
+      await new Promise(r => setTimeout(r, 300));
+      const logs = JSON.parse(localStorage.getItem('mockEmotionalLogs') || '[]');
+      const updated = logs.filter(l => l.id !== logId);
+      localStorage.setItem('mockEmotionalLogs', JSON.stringify(updated));
+      // also remove its comments
+      const comments = JSON.parse(localStorage.getItem('mockEmotionalComments') || '[]');
+      localStorage.setItem('mockEmotionalComments', JSON.stringify(comments.filter(c => c.log_id !== logId)));
+      return { error: null };
+    }
+    try {
+      await deleteDoc(doc(db, 'emotional_logs', logId));
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
+  },
+
+  async updateEmotionalLog(logId, data) {
+    if (isMockMode) {
+      await new Promise(r => setTimeout(r, 500));
+      const logs = JSON.parse(localStorage.getItem('mockEmotionalLogs') || '[]');
+      const idx = logs.findIndex(l => l.id === logId);
+      if (idx !== -1) {
+        logs[idx] = { ...logs[idx], ...data };
+        localStorage.setItem('mockEmotionalLogs', JSON.stringify(logs));
+        return { data: logs[idx], error: null };
+      }
+      return { data: null, error: new Error('Log not found') };
+    }
+    try {
+      const docRef = doc(db, 'emotional_logs', logId);
+      await updateDoc(docRef, data);
+      return { data: { id: logId, ...data }, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
+
+  async addEmotionalComment(logId, content) {
+    if (isMockMode) {
+      await new Promise(r => setTimeout(r, 400));
+      const comments = JSON.parse(localStorage.getItem('mockEmotionalComments') || '[]');
+      const newComment = { id: `ecmt-${Date.now()}`, log_id: logId, content, created_at: new Date().toISOString() };
+      comments.push(newComment);
+      localStorage.setItem('mockEmotionalComments', JSON.stringify(comments));
+      return { data: newComment, error: null };
+    }
+    try {
+      const commentData = { log_id: logId, content, created_at: new Date().toISOString() };
+      const docRef = await addDoc(collection(db, 'emotional_comments'), commentData);
+      return { data: { id: docRef.id, ...commentData }, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
 };
+

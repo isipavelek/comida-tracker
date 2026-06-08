@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { format, addDays, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, ArrowLeft, Loader2, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowLeft, Loader2, Download, Heart } from 'lucide-react';
 import MealCard from '../components/MealCard';
 
 export default function PatientDetail() {
@@ -32,7 +32,6 @@ export default function PatientDetail() {
   const handleAddComment = async (mealId, content) => {
     const { data, error } = await api.addComment(mealId, content);
     if (!error && data) {
-      // Update local state to show the comment instantly
       setMeals(meals.map(m => {
         if (m.id === mealId) {
           return { ...m, comments: [...(m.comments || []), data] };
@@ -49,7 +48,7 @@ export default function PatientDetail() {
 
   return (
     <div className="flex-col gap-6">
-      
+
       {/* Header */}
       <div className="flex-between" style={{ marginBottom: '-0.5rem' }}>
         <div className="flex-center gap-4">
@@ -58,11 +57,24 @@ export default function PatientDetail() {
           </button>
           <div>
             <h2 className="text-gradient m-0" style={{ fontSize: '1.5rem' }}>{patient.full_name}</h2>
-            <span className="text-sm text-muted">Registro Diario</span>
+            <span className="text-sm text-muted">Paciente</span>
           </div>
         </div>
         <button onClick={() => window.print()} className="btn-glass btn-icon no-print" title="Exportar a PDF" style={{ color: 'var(--primary)' }}>
           <Download size={20} />
+        </button>
+      </div>
+
+      {/* Tab switcher */}
+      <div className="patient-tab-switcher no-print">
+        <button
+          className="patient-tab"
+          onClick={() => navigate(`/professional/patient/${id}/emocional`)}
+        >
+          <Heart size={15} /> Emocional
+        </button>
+        <button className="patient-tab active">
+          🍽️ Comidas
         </button>
       </div>
 

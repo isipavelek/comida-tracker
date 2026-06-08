@@ -35,7 +35,7 @@ export default function ProfessionalDashboard() {
             <div 
               key={p.id} 
               className="glass-card p-4 flex-between animate-fade-in" 
-              onClick={() => navigate(`/professional/patient/${p.id}`)}
+              onClick={() => navigate(`/professional/patient/${p.id}/emocional`)}
               style={{ cursor: 'pointer' }}
             >
               <div>

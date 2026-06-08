@@ -75,6 +75,7 @@ export default function MealForm({ patientId, date, onSaved, onCancel, initialMe
         if (p.isNew && p.file) {
           const { data, error } = await api.uploadPhoto(p.file);
           if (error) throw error;
+          if (!data || !data.url) throw new Error('No se pudo obtener la URL de la foto subida.');
           finalImageUrls.push(data.url);
         } else {
           finalImageUrls.push(p.url);

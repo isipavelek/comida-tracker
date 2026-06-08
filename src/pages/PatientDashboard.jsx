@@ -4,15 +4,17 @@ import { useToast } from '../contexts/ToastContext';
 import { api } from '../lib/api';
 import { format, addDays, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Loader2, Heart } from 'lucide-react';
 import MealForm from '../components/MealForm';
 import MealCard from '../components/MealCard';
 import WaterTracker from '../components/WaterTracker';
 import PatientStats from '../components/PatientStats';
+import { useNavigate } from 'react-router-dom';
 
 const PatientDashboard = () => {
   const { user } = useAuth();
   const { toastSuccess, toastError, toastInfo } = useToast();
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -124,6 +126,13 @@ const PatientDashboard = () => {
             onClick={() => setShowForm(true)}
           >
             <Plus /> Registrar Comida
+          </button>
+
+          <button
+            className="btn btn-emotional-outline w-full p-3 font-semibold"
+            onClick={() => navigate('/patient/emocional')}
+          >
+            <Heart size={18} /> Registro Emocional
           </button>
 
           {loading ? (
