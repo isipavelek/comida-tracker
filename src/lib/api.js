@@ -311,22 +311,24 @@ export const api = {
     try {
       const q = query(
         collection(db, 'emotional_logs'),
-        where('patient_id', '==', patientId),
-        where('date', '>=', startDate),
-        where('date', '<=', endDate)
+        where('patient_id', '==', patientId)
       );
       const snap = await getDocs(q);
       const logs = [];
       for (const logDoc of snap.docs) {
-        const logData = { id: logDoc.id, ...logDoc.data(), comments: [] };
-        const cq = query(collection(db, 'emotional_comments'), where('log_id', '==', logDoc.id));
-        const cSnap = await getDocs(cq);
-        cSnap.forEach(cd => logData.comments.push({ id: cd.id, ...cd.data() }));
-        logs.push(logData);
+        const data = logDoc.data();
+        if (data.date >= startDate && data.date <= endDate) {
+          const logData = { id: logDoc.id, ...data, comments: [] };
+          const cq = query(collection(db, 'emotional_comments'), where('log_id', '==', logDoc.id));
+          const cSnap = await getDocs(cq);
+          cSnap.forEach(cd => logData.comments.push({ id: cd.id, ...cd.data() }));
+          logs.push(logData);
+        }
       }
       logs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       return { data: logs, error: null };
     } catch (error) {
+      console.error("Error in getEmotionalLogsByRange:", error);
       return { data: null, error };
     }
   },

@@ -15,17 +15,17 @@ function AppContent() {
 
   return (
     <div className="app-container">
-      <header className="mb-6 flex-between animate-fade-in py-1">
-        <h2 style={{ margin: 0 }}><span className="text-gradient">Nutri</span>Mente</h2>
-        {user && (
+      {user && (
+        <header className="mb-6 flex-between animate-fade-in py-1">
+          <h2 style={{ margin: 0 }}><span className="text-gradient">Nutri</span>Mente</h2>
           <div className="flex-center gap-4">
             <span className="text-sm text-muted">{profile?.full_name?.split(' ')[0]}</span>
             <button onClick={signOut} className="btn-glass btn-icon" title="Cerrar sesión">
               <span style={{ fontSize: '1.2rem' }}>🚪</span>
             </button>
           </div>
-        )}
-      </header>
+        </header>
+      )}
 
       <main className="flex-col relative" style={{ flex: 1 }}>
           {user && !profile ? (

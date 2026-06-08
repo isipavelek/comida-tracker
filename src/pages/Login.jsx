@@ -40,11 +40,15 @@ export default function Login() {
   };
 
   return (
-    <div className="flex-center w-full h-full" style={{ minHeight: '80vh' }}>
+    <div className="flex-col flex-center w-full h-full" style={{ minHeight: '80vh', gap: '1.5rem', justifyContent: 'center' }}>
+      <h1 className="animate-fade-in" style={{ fontSize: '2.8rem', fontWeight: 800, margin: 0, textAlign: 'center' }}>
+        <span className="text-gradient">Nutri</span>Mente
+      </h1>
+      
       <div className="glass-panel p-6 animate-fade-in" style={{ width: '100%', maxWidth: '400px' }}>
         <div className="text-center mb-6">
-          <h1 className="text-gradient mb-2">{isRegister ? 'Crear Cuenta' : 'Bienvenido'}</h1>
-          <p>{isRegister ? 'Ingresa tus datos para registrarte' : 'Inicia sesión para continuar'}</p>
+          <h2 className="mb-2" style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>{isRegister ? 'Crear Cuenta' : 'Bienvenido'}</h2>
+          <p className="text-sm text-muted" style={{ margin: 0 }}>{isRegister ? 'Ingresa tus datos para registrarte' : 'Inicia sesión para continuar'}</p>
         </div>
 
         {error && (
