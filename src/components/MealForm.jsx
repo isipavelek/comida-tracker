@@ -155,29 +155,29 @@ export default function MealForm({ patientId, date, onSaved, onCancel, initialMe
           <label className="mb-1 block text-sm text-gray-400">Fotos (Opcional)</label>
           
           <div className="flex-center justify-between gap-2 mb-3">
-            <input 
-              type="file" 
-              accept="image/*" 
-              capture="environment" 
-              ref={cameraInputRef} 
-              style={{ display: 'none' }} 
-              onChange={handlePhotoSelect} 
-            />
-            <button type="button" onClick={() => cameraInputRef.current?.click()} className="btn btn-glass w-full gap-2">
+            <label className="btn btn-glass w-full gap-2" style={{ cursor: 'pointer' }}>
               <Camera size={18} /> Cámara
-            </button>
+              <input 
+                type="file" 
+                accept="image/*" 
+                capture="environment" 
+                ref={cameraInputRef} 
+                style={{ display: 'none' }} 
+                onChange={handlePhotoSelect} 
+              />
+            </label>
 
-            <input 
-              type="file" 
-              accept="image/*" 
-              multiple
-              ref={fileInputRef} 
-              style={{ display: 'none' }} 
-              onChange={handlePhotoSelect} 
-            />
-            <button type="button" onClick={() => fileInputRef.current?.click()} className="btn btn-glass w-full gap-2">
+            <label className="btn btn-glass w-full gap-2" style={{ cursor: 'pointer' }}>
               <ImageIcon size={18} /> Galería
-            </button>
+              <input 
+                type="file" 
+                accept="image/*" 
+                multiple
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+                onChange={handlePhotoSelect} 
+              />
+            </label>
           </div>
           
           <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
