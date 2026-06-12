@@ -244,7 +244,7 @@ export const api = {
       ...data,
       patient_id: patientId,
       date: data.date || now.toISOString().split('T')[0],
-      time: now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+      time: data.time || now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
       created_at: now.toISOString(),
     };
 

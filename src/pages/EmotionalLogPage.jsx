@@ -150,10 +150,16 @@ export default function EmotionalLogPage() {
 
   const handleSaved = (savedLog) => {
     if (editingLog) {
-      // Update existing in list
-      setLogs(prev => prev.map(l => l.id === savedLog.id ? { ...l, ...savedLog } : l));
+      if (savedLog.date !== dateStr) {
+        setLogs(prev => prev.filter(l => l.id !== savedLog.id));
+        toastInfo('Registro movido a la fecha seleccionada');
+      } else {
+        setLogs(prev => prev.map(l => l.id === savedLog.id ? savedLog : l));
+      }
     } else {
-      setLogs(prev => [...prev, savedLog]);
+      if (savedLog.date === dateStr) {
+        setLogs(prev => [...prev, savedLog]);
+      }
     }
     setShowForm(false);
     setEditingLog(null);

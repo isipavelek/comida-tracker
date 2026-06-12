@@ -33,8 +33,14 @@ const excitacionLabel = (n) => {
 export default function EmotionalLogForm({ patientId, date, initialLog, onSaved, onCancel }) {
   const { toastSuccess, toastError } = useToast();
   const isEditing = !!initialLog;
-  const [form, setForm] = useState(
-    initialLog ? {
+
+  const getCurrentTime = () => {
+    const d = new Date();
+    return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+
+  const [form, setForm] = useState(() => {
+    const base = initialLog ? {
       auto_percepcion: initialLog.auto_percepcion || '',
       presentacion: initialLog.presentacion || '',
       tipo_persona_atraida: initialLog.tipo_persona_atraida || '',
@@ -44,8 +50,14 @@ export default function EmotionalLogForm({ patientId, date, initialLog, onSaved,
       pensamiento_descripcion: initialLog.pensamiento_descripcion || '',
       trabajar_en_sesion: initialLog.trabajar_en_sesion || '',
       observaciones: initialLog.observaciones || '',
-    } : EMPTY_FORM
-  );
+    } : { ...EMPTY_FORM };
+
+    return {
+      ...base,
+      date: initialLog ? (initialLog.date || date) : date,
+      time: initialLog ? (initialLog.time || getCurrentTime()) : getCurrentTime(),
+    };
+  });
   const [saving, setSaving] = useState(false);
 
   const set = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
@@ -63,8 +75,7 @@ export default function EmotionalLogForm({ patientId, date, initialLog, onSaved,
         onSaved({ ...initialLog, ...form });
       }
     } else {
-      const payload = { ...form, date };
-      const { data, error } = await api.createEmotionalLog(patientId, payload);
+      const { data, error } = await api.createEmotionalLog(patientId, form);
       setSaving(false);
       if (error) {
         toastError('Error al guardar el registro');
@@ -91,6 +102,31 @@ export default function EmotionalLogForm({ patientId, date, initialLog, onSaved,
         <button type="button" onClick={onCancel} className="btn-glass btn-icon">
           <X size={18} />
         </button>
+      </div>
+
+      {/* Date and Time Fields */}
+      <div style={{ display: 'flex', gap: '1rem' }}>
+        <div className="elf-group" style={{ flex: 1 }}>
+          <label className="elf-label">📅 Fecha</label>
+          <input 
+            type="date" 
+            className="glass-input" 
+            value={form.date}
+            onChange={e => set('date', e.target.value)}
+            disabled={!isEditing}
+            required
+          />
+        </div>
+        <div className="elf-group" style={{ flex: 1 }}>
+          <label className="elf-label">⏰ Hora</label>
+          <input 
+            type="time" 
+            className="glass-input" 
+            value={form.time}
+            onChange={e => set('time', e.target.value)}
+            required
+          />
+        </div>
       </div>
 
       {/* Auto-percepción */}

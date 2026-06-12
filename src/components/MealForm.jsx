@@ -18,7 +18,7 @@ export default function MealForm({ patientId, date, onSaved, onCancel, initialMe
   useEffect(() => {
     if (initialMeal) {
       setType(initialMeal.type || 'Almuerzo');
-      setDescription(initialMeal.description || '');
+      setDescription(initialMeal.description === 'No consumido' && initialMeal.skipped ? '' : (initialMeal.description || ''));
       
       if (initialMeal.time) setTime(initialMeal.time);
       else {
@@ -64,6 +64,40 @@ export default function MealForm({ patientId, date, onSaved, onCancel, initialMe
     });
   };
 
+  const handleSkip = async (e) => {
+    if (e) e.preventDefault();
+    setLoading(true);
+
+    try {
+      const mealData = {
+        patient_id: patientId,
+        date: date, // YYYY-MM-DD
+        time,       // HH:mm
+        type,
+        description: 'No consumido',
+        image_urls: [],
+        skipped: true
+      };
+
+      if (initialMeal) {
+        const { data, error } = await api.updateMeal(initialMeal.id, mealData);
+        if (error) throw error;
+        toastSuccess('¡Comida registrada como salteada!');
+        onSaved(data);
+      } else {
+        const { data, error } = await api.createMeal(mealData);
+        if (error) throw error;
+        toastSuccess('¡Comida registrada como salteada!');
+        onSaved(data);
+      }
+    } catch (err) {
+      console.error("Error al registrar comida salteada:", err);
+      toastError("Hubo un error al registrar la comida.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -88,7 +122,8 @@ export default function MealForm({ patientId, date, onSaved, onCancel, initialMe
         time,       // HH:mm
         type,
         description,
-        image_urls: finalImageUrls
+        image_urls: finalImageUrls,
+        skipped: false
       };
 
       if (initialMeal) {
@@ -211,9 +246,25 @@ export default function MealForm({ patientId, date, onSaved, onCancel, initialMe
           ></textarea>
         </div>
 
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? <Loader2 className="animate-pulse-slow" size={20} /> : 'Guardar Comida'}
-        </button>
+        <div className="flex-col gap-2 mt-4">
+          <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+            {loading ? <Loader2 className="animate-pulse-slow" size={20} /> : 'Guardar Comida'}
+          </button>
+          
+          <button 
+            type="button" 
+            onClick={handleSkip} 
+            className="btn btn-glass w-full" 
+            style={{ 
+              borderColor: 'rgba(239, 68, 68, 0.4)', 
+              color: 'var(--danger)',
+              background: 'rgba(239, 68, 68, 0.05)'
+            }}
+            disabled={loading}
+          >
+            No consumí esta comida (Salteada)
+          </button>
+        </div>
       </form>
     </div>
   );

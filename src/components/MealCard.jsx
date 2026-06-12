@@ -17,13 +17,29 @@ export default function MealCard({ meal, onDelete, onEdit, readOnly, onAddCommen
   const images = meal.image_urls || (meal.image_url ? [meal.image_url] : []);
 
   return (
-    <div className="glass-card p-4 animate-fade-in flex-col gap-3">
+    <div 
+      className="glass-card p-4 animate-fade-in flex-col gap-3"
+      style={meal.skipped ? { opacity: 0.8, borderLeft: '3px solid rgba(239, 68, 68, 0.5)' } : {}}
+    >
       <div className="flex-between">
         <div className="flex-center gap-2">
           <span className="font-semibold text-gradient" style={{ color: 'var(--primary)' }}>{meal.type}</span>
           <span className="text-muted text-xs flex-center gap-1">
             <Clock size={12} /> {timeStr}
           </span>
+          {meal.skipped && (
+            <span 
+              className="text-xs px-2 py-0.5 font-bold animate-pulse-slow" 
+              style={{ 
+                background: 'rgba(239, 68, 68, 0.15)', 
+                color: 'var(--danger)', 
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid rgba(239, 68, 68, 0.3)'
+              }}
+            >
+              Salteada
+            </span>
+          )}
         </div>
         {!readOnly && (
           <div className="flex-center gap-2">
@@ -52,7 +68,12 @@ export default function MealCard({ meal, onDelete, onEdit, readOnly, onAddCommen
       )}
 
       {meal.description && (
-        <p style={{ color: 'var(--text)', fontSize: '0.95rem' }}>{meal.description}</p>
+        <p style={{ 
+          color: meal.skipped ? 'var(--text-muted)' : 'var(--text)', 
+          fontSize: '0.95rem',
+          fontStyle: meal.skipped ? 'italic' : 'normal' 
+        }}>
+          {meal.description}</p>
       )}
 
       {meal.comments && meal.comments.length > 0 && meal.comments.map(c => (
